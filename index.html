@@ -9,13 +9,16 @@
 <title>Discover</title>
 <style>
 :root{--bg:#f4f5f8;--card:#fff;--tx:#1b1d22;--mut:#6b7280;--acc:#4f8cff;--bd:#e5e7eb}
-@media(prefers-color-scheme:dark){:root{--bg:#111318;--card:#1b1e25;--tx:#eceef2;--mut:#9aa1ad;--bd:#2a2e37}}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#111318;--card:#1b1e25;--tx:#eceef2;--mut:#9aa1ad;--bd:#2a2e37}}
+:root[data-theme=dark]{--bg:#111318;--card:#1b1e25;--tx:#eceef2;--mut:#9aa1ad;--bd:#2a2e37}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,sans-serif}
 header{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 12px 6px;border-bottom:1px solid var(--bd)}
 form{display:flex;gap:8px}
-input{min-width:0;padding:11px 14px;border-radius:24px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px}
-form input{flex:1}
+input[type=url],input[type=text],input[type=search],select{min-width:0;padding:11px 14px;border-radius:24px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px}
+form input,#sbox input{flex:1;width:100%}
+#sbox{padding-top:8px}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .add{background:var(--acc);color:#fff;border-radius:24px;padding:0 18px;font-weight:600;min-height:42px}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:8px 0 4px;scrollbar-width:none}
@@ -23,30 +26,49 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
 .chips.tags .chip{font-size:13px;padding:4px 12px}
 main{padding:12px;display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+main.compact{grid-template-columns:1fr;gap:8px}
 .card{background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 1px 3px #0002}
 .card.read{opacity:.55}
 .card a{color:inherit;text-decoration:none;display:block}
 .img{aspect-ratio:16/9;background:var(--bd) center/cover no-repeat}
+.compact .card a{display:flex}
+.compact .img{width:104px;aspect-ratio:1;flex:none}
+.compact .body{flex:1;min-width:0}
+.compact h3{font-size:16px;-webkit-line-clamp:2}
+.compact p{display:none}
 .body{padding:12px 14px 4px}
 .src{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:13px}
 .src img{width:18px;height:18px;border-radius:50%}
 h3{margin:8px 0 4px;font-size:18px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 p{margin:0;color:var(--mut);font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tg{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px 0}
-.tg span{font-size:12px;color:var(--acc);border:1px solid var(--bd);border-radius:10px;padding:1px 8px}
+.tg span{font-size:12px;border:1px solid;border-radius:10px;padding:1px 8px;cursor:pointer}
 .act{display:flex;justify-content:flex-end;padding:4px 8px 8px}
 .act button{padding:8px 10px;font-size:20px}
 .empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:60px 20px}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:20px;opacity:0;transition:.3s;pointer-events:none;z-index:20}
 #toast.on{opacity:1}
-dialog{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:18px;width:min(92vw,480px);padding:16px}
+dialog{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:18px;width:min(94vw,500px);max-height:88vh;padding:16px}
 dialog::backdrop{background:#0008}
-dialog h2{margin:0 0 10px;font-size:20px}
+dialog h2{margin:0 0 6px;font-size:20px}
+dialog h4{margin:18px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
 dialog form{flex-direction:column}
 .fr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd)}
-.fr span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fr>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fr small{display:block;color:var(--mut);overflow:hidden;text-overflow:ellipsis}
-.close{margin-top:10px;width:100%;padding:10px;border:1px solid var(--bd);border-radius:24px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;gap:10px}
+.row input[type=checkbox]{width:22px;height:22px;accent-color:var(--acc)}
+.hint{font-size:13px;margin:6px 0}
+.rf{display:flex;gap:6px;margin:8px 0}
+.rf input{flex:1;padding:9px 12px}
+.btn{display:block;width:100%;margin:6px 0;padding:10px;border:1px solid var(--bd);border-radius:24px}
+.tm{padding:4px 0 8px;border-bottom:1px solid var(--bd)}
+.tm .fr{border:0;padding-bottom:2px}
+.tp{border:1px solid;border-radius:10px;padding:1px 10px;font-size:14px}
+.swatch{display:flex;gap:10px;flex-wrap:wrap;padding:6px 2px}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid transparent}
+.dot.sel{border-color:var(--tx)}
+.close{margin-top:12px;width:100%;padding:10px;border:1px solid var(--bd);border-radius:24px}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 0 30px}
 </style>
 </head>
@@ -56,11 +78,12 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 0 30px}
     <input id="u" type="url" inputmode="url" placeholder="Enganxa un enllaç…" autocomplete="off">
     <button class="add">Afegeix</button>
   </form>
+  <div id="sbox" hidden><input id="q" type="search" placeholder="Cerca…" autocomplete="off"></div>
   <div class="chips" id="chips"></div>
   <div class="chips tags" id="tags"></div>
 </header>
 <main id="feed"></main>
-<footer>Discover v2.1 · 22/11/2026</footer>
+<footer>Discover v2.2 · 22/11/2026</footer>
 <div id="toast"></div>
 <input type="file" id="imp" accept="application/json" hidden>
 <dialog id="dlg">
@@ -73,38 +96,72 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px 0 30px}
   </form>
   <button class="close" id="dclose" type="button">Tanca</button>
 </dialog>
+<dialog id="sdlg">
+  <div id="sbody"></div>
+  <button class="close" data-act="close" type="button">Tanca</button>
+</dialog>
 <script>
 const $=s=>document.querySelector(s);
-const K={items:"discover.items.v1",feeds:"discover.feeds.v1",seen:"discover.seen.v1",sync:"discover.lastsync.v1",nofeed:"discover.nofeed.v1"};
+const K={items:"discover.items.v1",feeds:"discover.feeds.v1",seen:"discover.seen.v1",sync:"discover.lastsync.v1",nofeed:"discover.nofeed.v1",set:"discover.settings.v1",col:"discover.tagcolors.v1"};
 const ld=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch{return d}};
 let items=ld(K.items,[]),feeds=ld(K.feeds,[]),seen=new Set(ld(K.seen,[])),nofeed=new Set(ld(K.nofeed,[]));
+const DEF={theme:"auto",compact:false,autoOn:true,autoSite:false,rules:[],syncMin:30};
+let S=Object.assign({},DEF,ld(K.set,{}));if(!Array.isArray(S.rules))S.rules=[];
+let colors=ld(K.col,{});
 items.forEach(i=>{if(!Array.isArray(i.tags))i.tags=[];seen.add(i.url)});
 const saveItems=()=>localStorage.setItem(K.items,JSON.stringify(items));
 const saveFeeds=()=>localStorage.setItem(K.feeds,JSON.stringify(feeds));
 const saveSeen=()=>localStorage.setItem(K.seen,JSON.stringify([...seen].slice(-5000)));
+const saveSet=()=>localStorage.setItem(K.set,JSON.stringify(S));
+const saveCol=()=>localStorage.setItem(K.col,JSON.stringify(colors));
 let nextId=Math.max(Date.now(),...items.map(i=>i.id||0));
 const newId=()=>++nextId;
-let filter="unread",shuffle=false,tag=null;
+let filter="unread",shuffle=false,tag=null,q="";
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"";
+const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const slug=s=>norm(s).replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+const cleanTag=s=>String(s||"").trim().toLowerCase().replace(/^#/,"");
+function applyLook(){document.documentElement.dataset.theme=S.theme==="auto"?"":S.theme;$("#feed").classList.toggle("compact",!!S.compact)}
 
-const chips=[["unread","Per a tu"],["all","Tot"],["starred","★ Preferits"],["shuffle","🔀 Barreja"],["feeds","📡 Feeds"],["sync","⟳ Sincronitza"],["export","⬇ Còpia"],["import","⬆ Restaura"]];
-const ACTIONS=["feeds","sync","export","import"];
+/* ---------- colors i etiquetes ---------- */
+const PAL=["#4f8cff","#7c5cff","#e0509f","#ef4444","#f59e0b","#22c55e","#14b8a6","#64748b"];
+const hash=s=>[...s].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+const tagColor=t=>colors[t]||PAL[hash(t)%PAL.length];
+const tagStyle=(t,on)=>{const c=tagColor(t);return on?`background:${c};border-color:${c};color:#fff`:`color:${c};border-color:${c}66;background:${c}1a`};
+function autoTagsFor(it,feed){
+ const t=[];
+ if(feed&&feed.tag)t.push(feed.tag);
+ if(S.autoOn){
+  if(S.autoSite&&it.site){const s=slug(it.site);if(s)t.push(s)}
+  const hay=norm([it.title,it.description,it.site].join(" "));
+  for(const r of S.rules)if(r.k&&r.t&&hay.includes(norm(r.k)))t.push(r.t)}
+ return[...new Set(t)]}
+const tagCounts=()=>{const m={};items.forEach(i=>i.tags.forEach(t=>m[t]=(m[t]||0)+1));
+ feeds.forEach(f=>{if(f.tag&&!m[f.tag])m[f.tag]=0});S.rules.forEach(r=>{if(r.t&&!m[r.t])m[r.t]=0});
+ return Object.entries(m).sort((a,b)=>a[0].localeCompare(b[0]))};
+
+const chips=[["unread","Per a tu"],["all","Tot"],["starred","★ Preferits"],["shuffle","🔀 Barreja"],["search","🔍 Cerca"],["feeds","📡 Feeds"],["sync","⟳ Sincronitza"],["settings","⚙ Ajustos"]];
+const ACTIONS=["search","feeds","sync","settings"];
 function renderChips(){
- $("#chips").innerHTML=chips.map(([k,l])=>`<button class="chip ${k===filter&&!ACTIONS.includes(k)&&!(k==="shuffle"&&!shuffle)?'on':''}" data-k="${k}">${l}</button>`).join("");
+ $("#chips").innerHTML=chips.map(([k,l])=>{
+  const on=ACTIONS.includes(k)?(k==="search"&&(q||!$("#sbox").hidden)):(k===filter&&!(k==="shuffle"&&!shuffle));
+  return`<button class="chip ${on?'on':''}" data-k="${k}">${l}</button>`}).join("");
  const all=[...new Set(items.flatMap(i=>i.tags))].sort();
  if(tag&&!all.includes(tag))tag=null;
- $("#tags").innerHTML=all.map(t=>`<button class="chip ${t===tag?'on':''}" data-t="${esc(t)}">#${esc(t)}</button>`).join("");
-}
+ $("#tags").innerHTML=all.map(t=>`<button class="chip" style="${tagStyle(t,t===tag)}" data-t="${esc(t)}">#${esc(t)}</button>`).join("")}
 $("#chips").onclick=e=>{const k=e.target.dataset.k;if(!k)return;
- if(k==="export")return exportData();
- if(k==="import")return $("#imp").click();
+ if(k==="search"){const b=$("#sbox");b.hidden=!b.hidden;if(!b.hidden)$("#q").focus();renderChips();return}
  if(k==="feeds")return openFeeds();
  if(k==="sync")return syncFeeds(true);
+ if(k==="settings")return openSettings();
  if(k==="shuffle"){shuffle=true;filter="unread"}else{shuffle=false;filter=k}
  renderChips();render()};
 $("#tags").onclick=e=>{const t=e.target.dataset.t;if(!t)return;tag=tag===t?null:t;renderChips();render()};
+$("#q").oninput=e=>{q=e.target.value.trim();renderChips();render()};
 
 function exportData(){const a=document.createElement("a");
- a.href=URL.createObjectURL(new Blob([JSON.stringify({v:2,items,feeds,seen:[...seen]})],{type:"application/json"}));
+ a.href=URL.createObjectURL(new Blob([JSON.stringify({v:3,items,feeds,seen:[...seen],settings:S,colors})],{type:"application/json"}));
  a.download="discover-copia.json";a.click()}
 $("#imp").onchange=async e=>{try{
  const d=JSON.parse(await e.target.files[0].text());
@@ -113,14 +170,14 @@ $("#imp").onchange=async e=>{try{
  its.forEach(i=>{if(!have.has(i.url)){if(!Array.isArray(i.tags))i.tags=[];items.push(i);seen.add(i.url)}});
  (d.feeds||[]).forEach(f=>{if(!feeds.some(x=>x.url===f.url))feeds.push(f)});
  (d.seen||[]).forEach(u=>seen.add(u));
- saveItems();saveFeeds();saveSeen();renderChips();render();toast("Restaurat")}catch{toast("Fitxer no vàlid")}};
+ if(d.settings)S=Object.assign({},DEF,d.settings);
+ if(d.colors)colors=Object.assign({},d.colors,colors);
+ saveItems();saveFeeds();saveSeen();saveSet();saveCol();applyLook();renderChips();render();toast("Restaurat")}catch{toast("Fitxer no vàlid")}};
 
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),2400)}
 function ago(ts){const s=Math.max(0,(Date.now()-ts)/1000);
  if(s<3600)return`fa ${Math.max(1,s/60|0)} min`;if(s<86400)return`fa ${s/3600|0} h`;
  if(s<2592000)return`fa ${s/86400|0} d`;return new Date(ts).toLocaleDateString("ca")}
-const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"";
 
 /* ---------- xarxa ---------- */
 const PROXIES=[u=>"https://api.allorigins.win/raw?url="+encodeURIComponent(u),u=>"https://corsproxy.io/?"+encodeURIComponent(u)];
@@ -184,7 +241,7 @@ function parseFeed(xml,feedUrl){
 async function subscribe(url,tg,text){
  if(text===undefined)text=await fetchText(url);
  if(!text)return toast("No he pogut obrir el feed");
- if(!isFeed(text)){ // potser és una pàgina amb feed
+ if(!isFeed(text)){
   const m=parseHtml(text,url);
   if(!m.feedUrl)return toast("No hi trobo cap feed RSS");
   url=m.feedUrl;text=await fetchText(url);
@@ -192,7 +249,7 @@ async function subscribe(url,tg,text){
  if(feeds.some(f=>f.url===url))return toast("Ja hi estàs subscrit");
  const p=parseFeed(text,url);
  if(!p)return toast("Feed no vàlid");
- feeds.push({id:newId(),url,title:p.title,tag:(tg||"").trim().toLowerCase(),synced:false});
+ feeds.push({id:newId(),url,title:p.title,tag:cleanTag(tg),synced:false});
  saveFeeds();toast("Subscrit a "+(p.title||url));
  await syncFeeds(false);renderFeeds()}
 let syncing=false;
@@ -207,21 +264,22 @@ async function syncFeeds(manual){
    if(p.title&&!f.title)f.title=p.title;
    const fresh=p.entries.filter(e=>e.url&&!seen.has(e.url)).sort((a,b)=>b.date-a.date);
    const take=fresh.slice(0,f.synced?20:10);
-   if(!f.synced)fresh.slice(10).forEach(e=>seen.add(e.url)); // primera vegada: no inundem el feed
+   if(!f.synced)fresh.slice(10).forEach(e=>seen.add(e.url));
    f.synced=true;
    let lookups=0;
    for(const e of take){
     if(!e.image&&lookups<6){lookups++;const m=await getMeta(e.url);e.image=m.image;if(!e.description)e.description=m.description||""}
     const b=baseMeta(e.url);
-    items.push({id:newId(),url:e.url,title:e.title||e.url,description:e.description,image:e.image,site:f.title||b.site,favicon:b.favicon,added:e.date,read:false,starred:false,tags:f.tag?[f.tag]:[],feed:f.id});
-    seen.add(e.url);added++}
+    const it={id:newId(),url:e.url,title:e.title||e.url,description:e.description,image:e.image,site:f.title||b.site,favicon:b.favicon,added:e.date,read:false,starred:false,tags:[],feed:f.id};
+    it.tags=autoTagsFor(it,f);
+    items.push(it);seen.add(e.url);added++}
   }
  }finally{syncing=false}
  localStorage.setItem(K.sync,String(Date.now()));
  saveItems();saveFeeds();saveSeen();renderChips();render();
  toast(added?`${added} novetats`:"Res de nou")}
 function renderFeeds(){
- $("#feedlist").innerHTML=feeds.length?feeds.map(f=>`<div class="fr"><span>${esc(f.title||f.url)}${f.tag?` · #${esc(f.tag)}`:""}<small>${esc(f.url)}</small></span><button data-delfeed="${f.id}">🗑</button></div>`).join(""):'<p style="padding:8px 0">Encara no tens cap feed.</p>'}
+ $("#feedlist").innerHTML=feeds.length?feeds.map(f=>`<div class="fr"><span>${esc(f.title||f.url)}${f.tag?` · #${esc(f.tag)}`:""}<small>${esc(f.url)}</small></span><button data-delfeed="${f.id}">🗑</button></div>`).join(""):'<p class="hint">Encara no tens cap feed.</p>'}
 function openFeeds(){renderFeeds();$("#dlg").showModal()}
 $("#dclose").onclick=()=>$("#dlg").close();
 $("#feedlist").onclick=e=>{const id=e.target.dataset.delfeed;if(!id)return;
@@ -230,6 +288,71 @@ $("#ff").onsubmit=async e=>{e.preventDefault();const u=$("#fu").value.trim(),t=$
  $("#fu").value="";$("#ft").value="";
  let url=u;if(!/^https?:\/\//i.test(url))url="https://"+url;
  toast("Subscrivint…");await subscribe(url,t)};
+
+/* ---------- ajustos ---------- */
+function renderSettings(){
+ const opt=(cur,list)=>list.map(([v,l])=>`<option value="${v}" ${String(cur)===String(v)?"selected":""}>${l}</option>`).join("");
+ const tc=tagCounts();
+ $("#sbody").innerHTML=`
+ <h2>⚙ Ajustos</h2>
+ <h4>Aparença</h4>
+ <label class="row">Tema <select data-set="theme">${opt(S.theme,[["auto","Automàtic"],["light","Clar"],["dark","Fosc"]])}</select></label>
+ <label class="row">Targetes compactes <input type="checkbox" data-set="compact" ${S.compact?"checked":""}></label>
+ <h4>Etiquetes automàtiques</h4>
+ <label class="row">Activa-les <input type="checkbox" data-set="autoOn" ${S.autoOn?"checked":""}></label>
+ <label class="row">Etiqueta amb el nom del lloc <input type="checkbox" data-set="autoSite" ${S.autoSite?"checked":""}></label>
+ <p class="hint">Regles per paraules clau: si el títol o la descripció contenen la paraula, s'hi afegeix l'etiqueta.</p>
+ ${S.rules.map((r,i)=>`<div class="fr"><span>«${esc(r.k)}» → #${esc(r.t)}</span><button data-act="delrule" data-i="${i}">🗑</button></div>`).join("")}
+ <div class="rf"><input id="rk" type="text" placeholder="paraula"><input id="rt" type="text" placeholder="etiqueta"><button class="add" data-act="addrule">+</button></div>
+ <button class="btn" data-act="applyrules">Aplica-ho a les targetes existents</button>
+ <h4>Etiquetes: colors i noms</h4>
+ ${tc.length?tc.map(([t,n])=>`<div class="tm"><div class="fr"><span><span class="tp" style="${tagStyle(t)}">#${esc(t)}</span> <small style="display:inline">${n}</small></span><span><button data-act="rename" data-tag="${esc(t)}">✏️</button><button data-act="deltag" data-tag="${esc(t)}">🗑</button></span></div><div class="swatch">${PAL.map(c=>`<button class="dot ${tagColor(t)===c?'sel':''}" style="background:${c}" data-act="color" data-tag="${esc(t)}" data-c="${c}" aria-label="color"></button>`).join("")}</div></div>`).join(""):'<p class="hint">Encara no hi ha etiquetes.</p>'}
+ <h4>Sincronització</h4>
+ <label class="row">Comprova els feeds cada <select data-set="syncMin">${opt(S.syncMin,[[15,"15 min"],[30,"30 min"],[60,"1 hora"],[120,"2 hores"]])}</select></label>
+ <h4>Neteja</h4>
+ <button class="btn" data-act="readall">Marca-ho tot com a llegit</button>
+ <button class="btn" data-act="delread">Esborra les llegides (menys preferits)</button>
+ <h4>Dades</h4>
+ <button class="btn" data-act="export">⬇ Fes una còpia</button>
+ <button class="btn" data-act="import">⬆ Restaura una còpia</button>
+ <p class="hint">Discover v2.2 · 22/11/2026</p>`}
+function openSettings(){renderSettings();$("#sdlg").showModal()}
+function refreshAll(){saveItems();saveFeeds();saveSet();saveCol();renderChips();render();renderSettings()}
+$("#sdlg").addEventListener("change",e=>{const k=e.target.dataset.set;if(!k)return;
+ S[k]=e.target.type==="checkbox"?e.target.checked:(k==="syncMin"?Number(e.target.value):e.target.value);
+ saveSet();applyLook()});
+$("#sdlg").addEventListener("click",e=>{
+ const b=e.target.closest("[data-act]");if(!b)return;const d=b.dataset;
+ if(d.act==="close")return $("#sdlg").close();
+ if(d.act==="export")return exportData();
+ if(d.act==="import")return $("#imp").click();
+ if(d.act==="addrule"){const k=$("#rk").value.trim(),t=cleanTag($("#rt").value);
+  if(!k||!t)return toast("Cal una paraula i una etiqueta");
+  S.rules.push({k,t});saveSet();return renderSettings()}
+ if(d.act==="delrule"){S.rules.splice(Number(d.i),1);saveSet();return renderSettings()}
+ if(d.act==="applyrules"){let c=0;
+  items.forEach(i=>{const n=[...new Set([...i.tags,...autoTagsFor(i,feeds.find(f=>f.id===i.feed))])];
+   if(n.length!==i.tags.length){i.tags=n;c++}});
+  refreshAll();return toast(c+" targetes actualitzades")}
+ if(d.act==="color"){colors[d.tag]=d.c;return refreshAll()}
+ if(d.act==="rename"){const old=d.tag;const v=cleanTag(prompt("Nou nom per a #"+old,old));
+  if(!v||v===old)return;
+  items.forEach(i=>{if(i.tags.includes(old))i.tags=[...new Set(i.tags.map(x=>x===old?v:x))]});
+  feeds.forEach(f=>{if(f.tag===old)f.tag=v});
+  S.rules.forEach(r=>{if(r.t===old)r.t=v});
+  if(colors[old]){if(!colors[v])colors[v]=colors[old];delete colors[old]}
+  if(tag===old)tag=v;return refreshAll()}
+ if(d.act==="deltag"){const old=d.tag;if(!confirm("Vols esborrar l'etiqueta #"+old+" de totes les targetes?"))return;
+  items.forEach(i=>{i.tags=i.tags.filter(x=>x!==old)});
+  feeds.forEach(f=>{if(f.tag===old)f.tag=""});
+  S.rules=S.rules.filter(r=>r.t!==old);delete colors[old];
+  if(tag===old)tag=null;return refreshAll()}
+ if(d.act==="readall"){items.forEach(i=>i.read=true);refreshAll();return toast("Tot llegit")}
+ if(d.act==="delread"){const n=items.filter(i=>i.read&&!i.starred).length;
+  if(!n)return toast("No hi ha llegides");
+  if(!confirm("Esborrar "+n+" targetes llegides?"))return;
+  items=items.filter(i=>!i.read||i.starred);refreshAll();return toast(n+" esborrades")}
+});
 
 /* ---------- pàgines ---------- */
 async function addUrl(raw){
@@ -241,7 +364,9 @@ async function addUrl(raw){
  const text=await fetchText(raw);
  if(text&&isFeed(text)){toast("És un feed RSS, em hi subscric");return subscribe(raw,"",text)}
  const m=await getMeta(raw,text);
- items.push({id:newId(),url:raw,title:m.title,description:m.description,image:m.image,site:m.site,favicon:m.favicon,added:Date.now(),read:false,starred:false,tags:[]});
+ const it={id:newId(),url:raw,title:m.title,description:m.description,image:m.image,site:m.site,favicon:m.favicon,added:Date.now(),read:false,starred:false,tags:[]};
+ it.tags=autoTagsFor(it,null);
+ items.push(it);
  seen.add(raw);saveItems();saveSeen();filter="unread";shuffle=false;renderChips();render();toast("Afegit");
  if(m.feedUrl&&!feeds.some(f=>f.url===m.feedUrl)&&!nofeed.has(m.feedUrl)){
   if(confirm("Aquest lloc té un feed RSS:\n"+m.feedUrl+"\n\nVols subscriure-t'hi?"))await subscribe(m.feedUrl,"");
@@ -255,11 +380,13 @@ async function refreshItem(i){
  saveItems();render();toast("Actualitzat")}
 function editTags(i){
  const v=prompt("Etiquetes (separades per comes):",i.tags.join(", "));if(v===null)return;
- i.tags=[...new Set(v.split(",").map(s=>s.trim().toLowerCase().replace(/^#/,"")).filter(Boolean))];
+ i.tags=[...new Set(v.split(",").map(cleanTag).filter(Boolean))];
  saveItems();renderChips();render()}
 
 function render(){
- let l=items.filter(i=>(filter==="all"||(filter==="starred"?i.starred:!i.read))&&(!tag||i.tags.includes(tag)));
+ const nq=norm(q);
+ let l=items.filter(i=>(filter==="all"||(filter==="starred"?i.starred:!i.read))&&(!tag||i.tags.includes(tag))
+  &&(!nq||norm([i.title,i.description,i.site,i.tags.join(" ")].join(" ")).includes(nq)));
  l=shuffle?[...l].sort(()=>Math.random()-.5):[...l].sort((a,b)=>b.added-a.added);
  $("#feed").innerHTML=l.length?l.map(i=>`
  <article class="card ${i.read?'read':''}">
@@ -269,7 +396,7 @@ function render(){
     <div class="src"><img src="${esc(safeUrl(i.favicon))}" alt=""><span>${esc(i.site)} · ${ago(i.added)}</span></div>
     <h3>${esc(i.title)}</h3>${i.description?`<p>${esc(i.description)}</p>`:""}
    </div></a>
-  ${i.tags.length?`<div class="tg">${i.tags.map(t=>`<span>#${esc(t)}</span>`).join("")}</div>`:""}
+  ${i.tags.length?`<div class="tg">${i.tags.map(t=>`<span style="${tagStyle(t)}" data-ft="${esc(t)}">#${esc(t)}</span>`).join("")}</div>`:""}
   <div class="act"><button data-refresh="${i.id}" title="Refresca">↻</button><button data-tag="${i.id}" title="Etiquetes">🏷</button><button data-star="${i.id}">${i.starred?"★":"☆"}</button><button data-del="${i.id}">🗑</button></div>
  </article>`).join(""):`<div class="empty">Res per mostrar.<br>Enganxa un enllaç a dalt,<br>comparteix-lo des del Chrome<br>o subscriu-te a un feed (📡 Feeds).</div>`}
 $("#feed").onclick=e=>{const t=e.target,d=t.dataset;const get=id=>items.find(x=>x.id==id);
@@ -277,13 +404,14 @@ $("#feed").onclick=e=>{const t=e.target,d=t.dataset;const get=id=>items.find(x=>
  else if(d.del){items=items.filter(x=>x.id!=d.del);saveItems();renderChips();render()}
  else if(d.tag)editTags(get(d.tag));
  else if(d.refresh)refreshItem(get(d.refresh));
+ else if(d.ft){tag=d.ft;renderChips();render()}
  else{const a=t.closest("[data-open]");if(a){const i=get(a.dataset.open);i.read=true;saveItems();a.closest(".card").classList.add("read")}}};
 $("#f").onsubmit=async e=>{e.preventDefault();const v=$("#u").value;$("#u").value="";await addUrl(v)};
 
-function autoSync(){if(feeds.length&&Date.now()-Number(localStorage.getItem(K.sync)||0)>30*60*1000)syncFeeds(false)}
-if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=2.1");
+function autoSync(){if(feeds.length&&Date.now()-Number(localStorage.getItem(K.sync)||0)>S.syncMin*60*1000)syncFeeds(false)}
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=2.2");
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)autoSync()});
-renderChips();render();
+applyLook();renderChips();render();
 // Comparteix → Discover (Android envia url/text/title)
 const p=new URLSearchParams(location.search);
 const shared=p.get("url")||p.get("text");
