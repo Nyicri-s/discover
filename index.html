@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111318">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>Discover</title>
+<style>
+:root{--bg:#f4f5f8;--card:#fff;--tx:#1b1d22;--mut:#6b7280;--acc:#4f8cff;--bd:#e5e7eb}
+@media(prefers-color-scheme:dark){:root{--bg:#111318;--card:#1b1e25;--tx:#eceef2;--mut:#9aa1ad;--bd:#2a2e37}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 12px 6px;border-bottom:1px solid var(--bd)}
+form{display:flex;gap:8px}
+input[type=url]{flex:1;min-width:0;padding:11px 14px;border-radius:24px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.add{background:var(--acc);color:#fff;border-radius:24px;padding:0 18px;font-weight:600}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.chip{flex:none;padding:6px 14px;border-radius:16px;border:1px solid var(--bd);background:var(--card);font-size:14px}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+main{padding:12px;display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card{background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 1px 3px #0002}
+.card.read{opacity:.55}
+.card a{color:inherit;text-decoration:none;display:block}
+.img{aspect-ratio:16/9;background:var(--bd) center/cover no-repeat}
+.body{padding:12px 14px 4px}
+.src{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:13px}
+.src img{width:18px;height:18px;border-radius:50%}
+h3{margin:8px 0 4px;font-size:18px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+p{margin:0;color:var(--mut);font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.act{display:flex;justify-content:flex-end;padding:4px 8px 8px}
+.act button{padding:8px 10px;font-size:20px}
+.empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:60px 20px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:20px;opacity:0;transition:.3s;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <form id="f">
+    <input id="u" type="url" inputmode="url" placeholder="Enganxa un enllaç…" autocomplete="off">
+    <button class="add">Afegeix</button>
+  </form>
+  <div class="chips" id="chips"></div>
+</header>
+<main id="feed"></main>
+<div id="toast"></div>
+<input type="file" id="imp" accept="application/json" hidden>
+<script>
+const $=s=>document.querySelector(s);
+const KEY="discover.items.v1";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const save=()=>localStorage.setItem(KEY,JSON.stringify(items));
+let filter="unread",shuffle=false;
+const chips=[["unread","Per a tu"],["all","Tot"],["starred","★ Preferits"],["shuffle","🔀 Barreja"],["export","⬇ Còpia"],["import","⬆ Restaura"]];
+function renderChips(){$("#chips").innerHTML=chips.map(([k,l])=>`<button class="chip ${k===filter&&!["export","import"].includes(k)?'on':''}" data-k="${k}">${l}</button>`).join("")}
+$("#chips").onclick=e=>{const k=e.target.dataset.k;if(!k)return;
+ if(k==="export"){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(items)],{type:"application/json"}));a.download="discover-copia.json";a.click();return}
+ if(k==="import"){$("#imp").click();return}
+ if(k==="shuffle"){shuffle=true;filter="unread"}else{shuffle=false;filter=k}
+ renderChips();render()};
+$("#imp").onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());
+ const have=new Set(items.map(i=>i.url));d.forEach(i=>{if(!have.has(i.url))items.push(i)});save();render();toast("Restaurat")}catch{toast("Fitxer no vàlid")}};
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2200)}
+function ago(ts){const s=(Date.now()-ts)/1000;
+ if(s<3600)return`fa ${Math.max(1,s/60|0)} min`;if(s<86400)return`fa ${s/3600|0} h`;
+ if(s<2592000)return`fa ${s/86400|0} d`;return new Date(ts).toLocaleDateString("ca")}
+const esc=s=>(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl=u=>/^https?:\/\//i.test(u||"")?u:"";
+
+async function fetchMeta(url){
+ const host=new URL(url).hostname.replace(/^www\./,"");
+ const out={title:null,description:null,image:null,site:host,favicon:`https://www.google.com/s2/favicons?domain=${host}&sz=64`};
+ const proxies=[u=>"https://api.allorigins.win/raw?url="+encodeURIComponent(u),
+                u=>"https://corsproxy.io/?"+encodeURIComponent(u)];
+ for(const p of proxies){
+  try{
+   const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),9000);
+   const r=await fetch(p(url),{signal:ctl.signal});clearTimeout(t);
+   if(!r.ok)continue;
+   const doc=new DOMParser().parseFromString(await r.text(),"text/html");
+   const m=(...ns)=>{for(const n of ns){const el=doc.querySelector(`meta[property="${n}"],meta[name="${n}"]`);
+     if(el&&el.content&&el.content.trim())return el.content.trim()}return null};
+   out.title=m("og:title","twitter:title")||(doc.title||"").trim()||null;
+   out.description=m("og:description","twitter:description","description");
+   const img=m("og:image","twitter:image","twitter:image:src");
+   if(img){try{out.image=new URL(img,url).href}catch{}}
+   out.site=m("og:site_name")||out.site;
+   if(out.title)return out;
+  }catch{}
+ }
+ try{ // darrer recurs: microlink
+  const r=await fetch("https://api.microlink.io/?url="+encodeURIComponent(url));
+  const j=(await r.json()).data||{};
+  out.title=j.title;out.description=j.description;out.image=j.image&&j.image.url;out.site=j.publisher||out.site;
+ }catch{}
+ return out;
+}
+async function addUrl(raw){
+ raw=raw.trim();if(!raw)return;
+ if(!/^https?:\/\//i.test(raw))raw="https://"+raw;
+ try{new URL(raw)}catch{return toast("Enllaç no vàlid")}
+ if(items.some(i=>i.url===raw))return toast("Ja el tens");
+ toast("Afegint…");
+ const m=await fetchMeta(raw);
+ items.unshift({id:Date.now(),url:raw,title:m.title||raw,description:m.description,image:m.image,site:m.site,favicon:m.favicon,added:Date.now(),read:false,starred:false});
+ save();filter="unread";shuffle=false;renderChips();render();toast("Afegit");
+}
+function render(){
+ let l=items.filter(i=>filter==="all"||(filter==="starred"?i.starred:!i.read));
+ if(shuffle)l=[...l].sort(()=>Math.random()-.5);else l=[...l].sort((a,b)=>b.added-a.added);
+ $("#feed").innerHTML=l.length?l.map(i=>`
+ <article class="card ${i.read?'read':''}">
+  <a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener" data-open="${i.id}">
+   ${i.image?`<div class="img" style="background-image:url('${esc(safeUrl(i.image))}')"></div>`:""}
+   <div class="body">
+    <div class="src"><img src="${esc(safeUrl(i.favicon))}" alt=""><span>${esc(i.site)} · ${ago(i.added)}</span></div>
+    <h3>${esc(i.title)}</h3>${i.description?`<p>${esc(i.description)}</p>`:""}
+   </div></a>
+  <div class="act"><button data-star="${i.id}">${i.starred?"★":"☆"}</button><button data-del="${i.id}">🗑</button></div>
+ </article>`).join(""):`<div class="empty">Res per mostrar.<br>Enganxa un enllaç a dalt<br>o comparteix-lo des del Chrome.</div>`}
+$("#feed").onclick=e=>{const t=e.target;
+ if(t.dataset.star){const i=items.find(x=>x.id==t.dataset.star);i.starred=!i.starred;save();render()}
+ else if(t.dataset.del){items=items.filter(x=>x.id!=t.dataset.del);save();render()}
+ else{const a=t.closest("[data-open]");if(a){const i=items.find(x=>x.id==a.dataset.open);i.read=true;save();a.closest(".card").classList.add("read")}}};
+$("#f").onsubmit=async e=>{e.preventDefault();const v=$("#u").value;$("#u").value="";await addUrl(v)};
+
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
+renderChips();render();
+// Comparteix → Discover (Android envia url/text/title)
+const p=new URLSearchParams(location.search);
+const shared=p.get("url")||p.get("text");
+if(shared){history.replaceState(null,"",location.pathname);
+ addUrl((shared.split(/\s+/).find(w=>/^https?:\/\//i.test(w)))||shared)}
+</script>
+</body>
+</html>
